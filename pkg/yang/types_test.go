@@ -84,6 +84,13 @@ func TestTypeResolve(t *testing.T) {
 		},
 		{
 			in: &Type{
+				Name:   "string",
+				Length: &Length{Name: "-10 .. 10"},
+			},
+			err: "unknown: negative length: -10..10",
+		},
+		{
+			in: &Type{
 				Name:           "decimal64",
 				FractionDigits: &Value{Name: "7"},
 			},
@@ -92,6 +99,30 @@ func TestTypeResolve(t *testing.T) {
 				Kind:           Ydecimal64,
 				FractionDigits: 7,
 				Range:          Decimal64Range,
+			},
+		},
+		{
+			in: &Type{
+				Name: "union",
+				Enum: []*Enum{{
+					Name: "union",
+				}},
+			},
+			out: &YangType{
+				Name: "union",
+				Kind: Yunion,
+			},
+		},
+		{
+			in: &Type{
+				Name: "bits",
+				Bit: []*Bit{{
+					Name: "bit",
+				}},
+			},
+			out: &YangType{
+				Name: "bits",
+				Kind: Ybits,
 			},
 		},
 		// TODO(borman): Add in more tests as we honor more fields
@@ -105,6 +136,13 @@ func TestTypeResolve(t *testing.T) {
 		// making construction of them difficult.
 		tt.in.YangType.Root = nil
 		tt.in.YangType.Base = nil
+
+		if tt.in.YangType.Kind == Yunion {
+			tt.out.Enum = tt.in.YangType.Enum
+		}
+		if tt.in.YangType.Kind == Ybits {
+			tt.out.Bit = tt.in.YangType.Bit
+		}
 
 		switch {
 		case tt.err == "" && len(errs) > 0:
