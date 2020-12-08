@@ -147,6 +147,17 @@ module base {
     min-elements 0;
     max-elements 0;
   }
+  leaf-list dar {
+    type string;
+    // max-elements value is smaller than min-elements value
+    min-elements 5;
+     max-elements 1;
+  }
+  list daz {
+     // max-elements value is smaller than min-elements value
+     min-elements 5;
+     max-elements 1;
+  }
 }
 `,
 		errors: []string{
@@ -155,6 +166,8 @@ module base {
 			`bad-min-max-elements.yang:13:5: invalid min-elements value`,
 			`bad-min-max-elements.yang:14:5: invalid max-elements value`,
 			`bad-min-max-elements.yang:24:5: invalid max-elements value`,
+			`bad-min-max-elements.yang:26:3: max-elements value is smaller than min-elements value`,
+			`bad-min-max-elements.yang:32:3: max-elements value is smaller than min-elements value`,
 		},
 	},
 }
@@ -2752,6 +2765,25 @@ func TestDeviation(t *testing.T) {
 			}},
 		},
 	}, {
+		desc: "error case - deviation add max-element and min-element,max-element is smaller min-element",
+		inFiles: map[string]string{
+			"deviate": `
+               module deviate {
+                   prefix "d";
+                   namespace "urn:d";
+
+                   leaf-list ll { type string; }
+
+                   deviation /ll {
+                       deviate add {
+                           min-elements 100;
+                           max-elements 42;
+                       }
+                   }
+               }`,
+		},
+		wantProcessErrSubstring: "max-elements value is smaller than min-elements value",
+    }, {
 		desc: "error case - deviation add max-element to non-list",
 		inFiles: map[string]string{
 			"deviate": `

@@ -619,6 +619,9 @@ func ToEntry(n Node) (e *Entry) {
 		if e.ListAttr.MinElements, err = semCheckMinElements(s.MinElements); err != nil {
 			e.addError(err)
 		}
+		if err == nil && e.ListAttr.MaxElements < e.ListAttr.MinElements {
+			e.addError(fmt.Errorf("%s: max-elements value is smaller than min-elements value", Source(n)))
+		}
 		e.Prefix = getRootPrefix(e)
 		addExtraKeywordsToLeafEntry(n, e)
 		return e
@@ -651,6 +654,9 @@ func ToEntry(n Node) (e *Entry) {
 		}
 		if e.ListAttr.MinElements, err = semCheckMinElements(s.MinElements); err != nil {
 			e.addError(err)
+		}
+		if err == nil && e.ListAttr.MaxElements < e.ListAttr.MinElements {
+			e.addError(fmt.Errorf("%s: max-elements value is smaller than min-elements value", Source(n)))
 		}
 	case *Choice:
 		e.Kind = ChoiceEntry
@@ -953,6 +959,9 @@ func ToEntry(n Node) (e *Entry) {
 					if e.ListAttr.MinElements, err = semCheckMinElements(v); err != nil {
 						e.addError(err)
 					}
+				}
+				if err == nil && e.ListAttr.MaxElements < e.ListAttr.MinElements {
+					e.addError(fmt.Errorf("%s: max-elements value is smaller than min-elements value", Source(n)))
 				}
 			}
 		case "units":
